@@ -190,22 +190,34 @@ def pack_uatype(vtype, value):
     else:
         return struct_to_binary(value)
 
-
+_unpack_uatype_cache = {}
 def unpack_uatype(vtype, data):
+    try:
+        return _unpack_uatype_cache[id(vtype)](data)
+    except: # Cache miss
+        assert(len(_unpack_uatype_cache) < 100)
+        pass
+
     if hasattr(Primitives, vtype.name):
         st = getattr(Primitives, vtype.name)
+        _unpack_uatype_cache[id(vtype)] = st.unpack
         return st.unpack(data)
     elif vtype.value > 25:
+        _unpack_uatype_cache[id(vtype)] = Primitives.Bytes.unpack
         return Primitives.Bytes.unpack(data)
     elif vtype == ua.VariantType.ExtensionObject:
+        _unpack_uatype_cache[id(vtype)] = extensionobject_from_binary
         return extensionobject_from_binary(data)
     elif vtype in (ua.VariantType.NodeId, ua.VariantType.ExpandedNodeId):
+        _unpack_uatype_cache[id(vtype)] = nodeid_from_binary
         return nodeid_from_binary(data)
     elif vtype == ua.VariantType.Variant:
+        _unpack_uatype_cache[id(vtype)] = variant_from_binary
         return variant_from_binary(data)
     else:
         if hasattr(ua, vtype.name):
             klass = getattr(ua, vtype.name)
+            _unpack_uatype_cache[id(vtype)] = lambda data: struct_from_binary(klass, data)
             return struct_from_binary(klass, data)
         else:
             raise UaError("Cannot unpack unknown variant type {0!s}".format(vtype))
