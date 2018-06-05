@@ -14,11 +14,6 @@ try:
 except ImportError:
     from urlparse import urlparse
 
-try:
-    import cPickle as pickle # python 2.x
-except:
-    import pickle # python 3.x will automatically load accelerated Pickle version
-
 from opcua import ua
 from opcua.common import utils
 from opcua.common.callback import (CallbackType, ServerItemCallback,
