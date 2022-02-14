@@ -107,7 +107,7 @@ if __name__ == '__main__':
             time.sleep(1)
             # ft_vp.write_value(var)
             # var = var+10
-            print("teste")
+            # print("teste")
             # new_val = myvar.get_value()
             # _logger.info('Set value of %s to %d', myvar, new_val)
     finally:
