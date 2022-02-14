@@ -8,6 +8,7 @@ from asyncua import ua, Server, Node
 from azure.eventhub import EventHubConsumerClient
 import threading
 from azure.iot.hub import IoTHubRegistryManager
+from threading import Timer
 
 # Outra ideia q tive: usar asyncio.to_thread para ter um loop (Vale a pena? n sei)
 
@@ -16,6 +17,7 @@ sys.path.insert(0, "..")
 CONNECTION_STR = f'Endpoint=sb://iothub-ns-jefter-iot-17261576-9d69730fe6.servicebus.windows.net/;SharedAccessKeyName=service;SharedAccessKey=N7AZH3v7rTXrBupV/CRWG8G62rDh9+qsCFxG49nayPU=;EntityPath=jefter-iothub'
 connection_str = 'HostName=Jefter-IoThub.azure-devices.net;SharedAccessKeyName=service;SharedAccessKey=N7AZH3v7rTXrBupV/CRWG8G62rDh9+qsCFxG49nayPU='
 device_id = 'Device0'
+beacon_interval = 60
 global last_ft_rst
 
 class SubscriptionHandler:
@@ -25,6 +27,16 @@ class SubscriptionHandler:
     def __init__(self):
         # Create IoTHubRegistryManager
         self.registry_manager = IoTHubRegistryManager.from_connection_string(connection_str)
+        self.registerTimeCallback(beacon_interval, self.keepConnectionAlive,
+                                  [beacon_interval,self.registry_manager])
+
+    def keepConnectionAlive(self, interval, manager):
+        manager.send_c2d_message(device_id, "beacon")
+        print("Beacon Enviado")
+        Timer(interval, self.keepConnectionAlive, [interval, manager]).start()
+
+    def registerTimeCallback(self, interval, callback, args):
+        Timer(interval, callback, args).start()
 
     def datachange_notification(self, node: Node, val, data):
         """
