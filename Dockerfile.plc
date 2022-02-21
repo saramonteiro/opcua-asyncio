@@ -5,9 +5,9 @@ WORKDIR /app
 COPY plc_requirements.txt ./
 RUN pip install -r plc_requirements.txt
 
-COPY ./examples/plc_server.py .
+COPY ./examples/plc_server_async.py .
 
 EXPOSE 4840
 
-CMD [ "python3", "-u", "./plc_server.py" ]
+CMD [ "python3", "-u", "./plc_server_async.py" ]
 
