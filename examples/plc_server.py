@@ -13,6 +13,7 @@ import threading
 import json
 
 CONNECTION_STR = f'Endpoint=sb://iothub-ns-iothub-pr2-17437015-f9d8fd3d79.servicebus.windows.net/;SharedAccessKeyName=service;SharedAccessKey=ppdMVMTfPd1uPtfC/YwraezOxehJxGkjCoKg9arg1E8=;EntityPath=iothub-pr2qmy'
+
 # Define callback to process event
 def on_event(partition_context, event):
     global myvar
@@ -25,8 +26,14 @@ def on_event(partition_context, event):
 if __name__ == '__main__':
     # logging.basicConfig(level=logging.DEBUG)
     global myvar
+
+    print("Connecting to IoT HUB")
+
     # Event Hub client
     client = EventHubConsumerClient.from_connection_string(conn_str=CONNECTION_STR, consumer_group="opcserver")
+
+    print(client.get_eventhub_properties())
+
     ConsumerThread = threading.Thread(
         target=client.receive,
         kwargs={"on_event": on_event}

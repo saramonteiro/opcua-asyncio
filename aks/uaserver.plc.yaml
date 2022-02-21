@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uaserver-plc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uaserver-plc
+  template:
+    metadata:
+      labels:
+        app: uaserver-plc
+    spec:
+      containers:
+        - name: uaserver-plc
+          image: aegea.azurecr.io/plc-server:0.0.5-amd64
+          ports:
+            - containerPort: 4840
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: uaserver-plc
+spec:
+    type: LoadBalancer
+    ports:
+    - port: 4840
+    selector:
+        app: uaserver-plc
