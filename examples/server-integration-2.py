@@ -9,14 +9,11 @@ from azure.eventhub import EventHubConsumerClient
 import threading
 from azure.iot.hub import IoTHubRegistryManager
 from threading import Timer
-
-# Outra ideia q tive: usar asyncio.to_thread para ter um loop (Vale a pena? n sei)
+import os
 
 sys.path.insert(0, "..")
 
-CONNECTION_STR = f'Endpoint=sb://iothub-ns-jefter-iot-17261576-9d69730fe6.servicebus.windows.net/;SharedAccessKeyName=service;SharedAccessKey=N7AZH3v7rTXrBupV/CRWG8G62rDh9+qsCFxG49nayPU=;EntityPath=jefter-iothub'
-connection_str = 'HostName=Jefter-IoThub.azure-devices.net;SharedAccessKeyName=service;SharedAccessKey=N7AZH3v7rTXrBupV/CRWG8G62rDh9+qsCFxG49nayPU='
-device_id = 'Device0'
+device_id = 'iotdevice'
 beacon_interval = 60
 global last_ft_rst
 
@@ -26,7 +23,8 @@ class SubscriptionHandler:
     """
     def __init__(self):
         # Create IoTHubRegistryManager
-        self.registry_manager = IoTHubRegistryManager.from_connection_string(connection_str)
+        IOTHUBCS = os.getenv("IOTHUBCS")
+        self.registry_manager = IoTHubRegistryManager.from_connection_string(IOTHUBCS)
         self.registerTimeCallback(beacon_interval, self.keepConnectionAlive,
                                   [beacon_interval,self.registry_manager])
 
@@ -99,31 +97,34 @@ async def update_values(telemetry):
 
 # Define callback to process event
 def on_event(partition_context, event):
-    # print(event)
     telemetry = event.body_as_json()
-    print(telemetry)
-    asyncio.run(update_values(telemetry))
-
+    # PCL messages come in list format
+    # On a next release, all msgs should come 
+    # in the same format and we should have a category identifier 
+    if type(telemetry) != list:
+        print(telemetry)
+        asyncio.run(update_values(telemetry))
 
 async def main():
     # logging.basicConfig(level=logging.DEBUG)
     global ft_vp, ft_min, ft_max, ft_ue, ft_tot, ft_rst, li_vp, li_ue, ls, ls_st
     global first_time
     first_time = True
+
+    EVENTHUBCS = os.getenv("EVENTHUBCS")
     # Event Hub client
-    client = EventHubConsumerClient.from_connection_string(conn_str=CONNECTION_STR, consumer_group="$Default")
+    client = EventHubConsumerClient.from_connection_string(conn_str=EVENTHUBCS, consumer_group="iotdevs")
     # _logger = logging.getLogger('asyncua')
-    # setup our server
+
+    # Setup OPC UA server
     server = Server()
     await server.init()
-    server.set_endpoint('opc.tcp://0.0.0.0:4840/aegea/eta01/server/') # opc.tcp://localhost:4840/aegea/eta01/server/
+    server.set_endpoint('opc.tcp://0.0.0.0:4840/aegea/eta01/server/')
     server.set_server_name("AEGEA - ETA 01 Server")
     # setup our own namespace, not really necessary but should as spec
     uri = 'http://microsoft.com/Opc/OpcPlc'
     idx = await server.register_namespace(uri)
 
-    # populating our address space
-    # server.nodes, contains links to very common nodes like objects and root
     ft = await server.nodes.objects.add_object(idx, 'FT-00')
     ft_vp = await ft.add_variable(idx, 'VP', 0)
     ft_min = await ft.add_variable(idx, 'MIN', 0)
@@ -141,14 +142,16 @@ async def main():
     await ls_st.set_writable()
     # _logger.info('Starting server!')  
     await server.start()
+
+    # Subscribe to changes come from OPC UA clients
     handler = SubscriptionHandler()
     subscription = await server.create_subscription(500, handler)
     await subscription.subscribe_data_change(ft_rst)
     await subscription.subscribe_data_change(ls_st)
-    # task1 = asyncio.create_task(server.start())
+
+    # Start parallel thread for listening on event
     ConsumerThread = threading.Thread(target=client.receive, kwargs={"on_event": on_event})
     ConsumerThread.start()
-    # task2 = asyncio.create_task(client.receive(on_event))
 
     try:
         while True:
