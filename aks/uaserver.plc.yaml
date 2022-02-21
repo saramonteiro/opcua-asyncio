@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: uaserver-plc
-          image: aegea.azurecr.io/plc-server:0.0.8-amd64
+          image: aegea.azurecr.io/plc-server:0.0.9-amd64
           ports:
             - containerPort: 4840
           env:
