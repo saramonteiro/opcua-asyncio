@@ -45,7 +45,7 @@ if __name__ == '__main__':
     # server.init()
 
     ENDPOINT = os.getenv("ENDPOINT", "opc.tcp://0.0.0.0:4840/aegea/eta02/server/")
-    SERVER_NAME = os.getenv("SERVER_NAME", "AEGEA - ETA 02 Server")
+    SERVER_NAME = os.getenv("SERVER_NAME", "AEGEA - ETA 03 Server")
 
     server.set_endpoint(ENDPOINT)
     server.set_server_name(SERVER_NAME)

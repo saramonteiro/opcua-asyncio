@@ -14,14 +14,14 @@ spec:
     spec:
       containers:
         - name: uaserver-plc
-          image: aegea.azurecr.io/plc-server:0.0.9-amd64
+          image: aegea.azurecr.io/plc-server:0.1.0-amd64
           ports:
             - containerPort: 4840
           env:
             - name: ENDPOINT
               value: 'opc.tcp://0.0.0.0:4840/aegea/eta02/server/'
             - name: SERVER_NAME
-              value: 'AEGEA - ETA 02 Server'
+              value: 'AEGEA - ETA 03 Server'
 
 
 ---
