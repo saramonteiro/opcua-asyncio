@@ -1,5 +1,7 @@
 import asyncio
 import sys
+import os
+
 sys.path.insert(0, "..")
 
 from asyncua import  Server
@@ -21,8 +23,13 @@ async def main():
     print("Starting UA Server...")
     server = Server()
 
-    await server.init()
-    server.set_endpoint('opc.tcp://0.0.0.0:4840/aegea/eta02/server/')
+    #await server.init()
+
+    ENDPOINT = os.getenv("ENDPOINT", "opc.tcp://0.0.0.0:4840/aegea/eta02/server/")
+    SERVER_NAME = os.getenv("SERVER_NAME", "AEGEA - ETA 02 Server")
+
+    server.set_endpoint(ENDPOINT)
+    server.set_server_name(SERVER_NAME)
 
     # setup our own namespace, not really necessary but should as spec
     uri = 'http://microsoft.com/Opc/OpcPlc'
@@ -37,7 +44,8 @@ async def main():
     await myvar.set_writable()
 
     await server.start()
-    print('opc.tcp://0.0.0.0:4840/aegea/eta02/server/')
+    print(ENDPOINT)
+    print(SERVER_NAME)
 
     print("Connecting to IoT Hub...")
 
