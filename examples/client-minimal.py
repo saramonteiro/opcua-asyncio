@@ -9,7 +9,8 @@ _logger = logging.getLogger('asyncua')
 
 
 async def main():
-    url = 'opc.tcp://localhost:4840/freeopcua/server/'
+    #url = 'opc.tcp://localhost:4840/aegea/eta02/server/'
+    url = 'opc.tcp://13.85.199.31:4840/aegea/eta02/server/'
     # url = 'opc.tcp://commsvr.com:51234/UA/CAS_UA_Server'
     async with Client(url=url) as client:
         # Client has a few methods to get proxy to UA nodes that should always be in address space such as Root or Objects
