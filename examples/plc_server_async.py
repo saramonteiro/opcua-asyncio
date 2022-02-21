@@ -23,7 +23,7 @@ async def main():
     print("Starting UA Server...")
     server = Server()
 
-    #await server.init()
+    await server.init()
 
     ENDPOINT = os.getenv("ENDPOINT", "opc.tcp://0.0.0.0:4840/aegea/eta02/server/")
     SERVER_NAME = os.getenv("SERVER_NAME", "AEGEA - ETA 02 Server")
