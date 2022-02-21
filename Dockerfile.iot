@@ -1,0 +1,12 @@
+FROM amd64/python:3.7
+
+WORKDIR /app
+
+COPY iot_requirements.txt ./
+RUN pip install -r iot_requirements.txt
+
+COPY ./examples/server-integration-2.py .
+
+EXPOSE 4840
+
+CMD [ "python3", "-u", "./server-integration-2.py" ]

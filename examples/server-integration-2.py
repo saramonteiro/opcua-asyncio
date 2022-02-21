@@ -1,7 +1,7 @@
 from email import message
 import logging
 import asyncio
-from syncer import sync
+#from syncer import sync
 import sys
 import time
 from asyncua import ua, Server, Node
@@ -119,8 +119,13 @@ async def main():
     # Setup OPC UA server
     server = Server()
     await server.init()
-    server.set_endpoint('opc.tcp://0.0.0.0:4840/aegea/eta01/server/')
-    server.set_server_name("AEGEA - ETA 01 Server")
+
+    ENDPOINT = os.getenv("ENDPOINT", "opc.tcp://0.0.0.0:4840/aegea/eta01/server/")
+    SERVER_NAME = os.getenv("SERVER_NAME", "AEGEA - ETA 01 Server")
+
+    server.set_endpoint(ENDPOINT)
+    server.set_server_name(SERVER_NAME)
+
     # setup our own namespace, not really necessary but should as spec
     uri = 'http://microsoft.com/Opc/OpcPlc'
     idx = await server.register_namespace(uri)
